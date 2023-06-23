@@ -20,7 +20,7 @@ with open('IndianFoodDatasetCSV.csv','r') as file:
     mycursor=db.cursor() 
     
     for row in reader:
-        mycursor.execute('insert into recipe_data(RecipeName,Ingredients,TotalTimeInMins,Servings,Cuisine,Course,Diet,Instructions,URL)values(%s,%s,%s,%s,%s,%s,%s,%s,%s)',row)
+        mycursor.execute('insert into recipedata(recipename,ingredients,totaltimeinmins,servings,cuisine,course,diet,instructions,imageurl)values(%s,%s,%s,%s,%s,%s,%s,%s,%s)',row)
         
     db.commit()
 

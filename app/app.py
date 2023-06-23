@@ -40,6 +40,15 @@ def signup():
     email = request.json.get('email')
     password = request.json.get('password')
     confirm_password = request.json.get('confirm_password')
+    
+    check_query = "SELECT * FROM user_details WHERE email = %s"
+    check_values = (email,)
+    mycursor.execute(check_query, check_values)
+    existing_user = mycursor.fetchone()
+
+    if existing_user:
+        return jsonify({"message": "User already exists"})
+
 
     sql="insert into user_details(fullname,email,password,confirm_password)values(%s,%s,%s,%s)"
     values=(fullname,email,password,confirm_password)
@@ -71,15 +80,13 @@ def login():
             'user_id': user[0],
             'fullname': user[1],
             'email': user[2],
-            'password': user[3],
-            'confirm_password': user[4]
         }
         user_list.append(user_dict)
 
     return jsonify(user_list)
     
-@app.route("/recipe_search_byname/<RecipeName>",methods=['GET'])
-def recipe_search_byname(RecipeName):
+@app.route("/recipe_search_byname/<recipename>",methods=['GET'])
+def recipe_search_byname(recipename):
     db = mysql.connector.connect(
     host='localhost',
     port=3307,
@@ -89,32 +96,32 @@ def recipe_search_byname(RecipeName):
     )
     mycursor=db.cursor()
     
-    RecipeName = request.json.get('RecipeName')
-    sql="select * from `recipe_data` where `RecipeName`LIKE '{}'".format(RecipeName)
+    recipename = request.json.get('recipename')
+    sql="select * from `recipedata` where `recipename`LIKE '{}'".format(recipename)
 
     mycursor.execute(sql)
     users=mycursor.fetchall()
     user_list = []
     for user in users:
         user_dict = {
-            'RecipeId': user[0],
-            'RecipeName': user[1],
-            'Ingredients': user[2],
-            'TotalTimeInMins': user[3],
-            'Servings': user[4],
-            'Cuisine':user[5],
-            'Course':user[6],
-            'Diet':user[7],
-            'Instructions':user[8],
-            'URL':user[9]
+            'recipeid': user[0],
+            'recipename': user[1],
+            'ingredients': user[2],
+            'totaltimeinmins': user[3],
+            'servings': user[4],
+            'cuisine':user[5],
+            'course':user[6],
+            'diet':user[7],
+            'instructions':user[8],
+            'imageurl':user[9]
         }
         user_list.append(user_dict)
 
     return jsonify(user_list)   
 
 
-@app.route("/recipe_search_by_ingredient/<ingredient>", methods=['GET'])
-def recipe_search_by_ingredient(ingredient):
+@app.route("/recipe_search_by_ingredient/<ingredients>", methods=['GET'])
+def recipe_search_by_ingredient(ingredients):
     db = mysql.connector.connect(
         host='localhost',
         port=3307,
@@ -124,24 +131,26 @@ def recipe_search_by_ingredient(ingredient):
     )
     mycursor = db.cursor()
 
-    sql = "SELECT * FROM `recipe_data` WHERE `Ingredients` LIKE %s"
-    value = ('%' + ingredient + '%',)  # Using '%' for partial matching
+    ingredients = request.json.get('ingredients')
+    
+    sql = "SELECT * FROM `recipedata` WHERE `ingredients` LIKE %s"
+    value = ('%' + ingredients + '%',)  # Using '%' for partial matching
 
     mycursor.execute(sql, value)
     recipes = mycursor.fetchall()
     recipe_list = []
     for recipe in recipes:
         recipe_dict = {
-            'RecipeId': recipe[0],
-            'RecipeName': recipe[1],
-            'Ingredients': recipe[2],
-            'TotalTimeInMins': recipe[3],
-            'Servings': recipe[4],
-            'Cuisine': recipe[5],
-            'Course': recipe[6],
-            'Diet': recipe[7],
-            'Instructions': recipe[8],
-            'URL': recipe[9]
+            'recipeid': recipe[0],
+            'recipename': recipe[1],
+            'ingredients': recipe[2],
+            'totaltimeinmins': recipe[3],
+            'servings': recipe[4],
+            'cuisine': recipe[5],
+            'course': recipe[6],
+            'diet': recipe[7],
+            'instructions': recipe[8],
+            'imageurl': recipe[9]
         }
         recipe_list.append(recipe_dict)
 
