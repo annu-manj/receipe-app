@@ -1,14 +1,18 @@
-from flask import Flask, render_template, request,redirect,url_for,jsonify
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, render_template, request,jsonify
 import mysql.connector
-from flask_marshmallow import Marshmallow
-from flask_cors import CORS
+#from flask_sqlalchemy import SQLAlchemy
+#from flask_marshmallow import Marshmallow
+#from flask_cors import CORS
 import json
 import csv
 import MySQLdb
+from datetime import datetime
 
 app = Flask(__name__)
-ma=Marshmallow(app)
+#ma=Marshmallow(app)
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:@localhost:3307/recipe_app_db'
+#app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+#db=SQLAlchemy(app)
 db = mysql.connector.connect(
     host='localhost',
     port=3307,
@@ -16,15 +20,14 @@ db = mysql.connector.connect(
     password='',
     database='recipe_app_db'
 )
-CORS(app)
-
-
-
+#CORS(app)
 
 @app.route("/",methods=['GET']) 
 def index():
     return jsonify({"message":"working"})
 
+
+#signup api
 @app.route("/signup", methods=[ 'POST'])
 def signup():
     db = mysql.connector.connect(
@@ -41,7 +44,7 @@ def signup():
     password = request.json.get('password')
     confirm_password = request.json.get('confirm_password')
     
-    check_query = "SELECT * FROM user_details WHERE email = %s"
+    check_query = "SELECT * FROM userdata WHERE email = %s"
     check_values = (email,)
     mycursor.execute(check_query, check_values)
     existing_user = mycursor.fetchone()
@@ -49,14 +52,17 @@ def signup():
     if existing_user:
         return jsonify({"message": "User already exists"})
 
-
-    sql="insert into user_details(fullname,email,password,confirm_password)values(%s,%s,%s,%s)"
-    values=(fullname,email,password,confirm_password)
-    mycursor.execute(sql,values)
-    db.commit()
+    if password == confirm_password:
+        sql="insert into userdata(fullname,email,password,confirm_password,createddate,status)values(%s,%s,%s,%s,%s,%s)"
+        values=(fullname,email,password,confirm_password,datetime.now(),"active")
+        mycursor.execute(sql,values)
+        db.commit()
+        return jsonify({"message":"signed up"})
+    else:
+        return jsonify({"message":"password doesn't match"})
         
-    return jsonify({"message":"signed up"})
-
+    
+#login api
 @app.route("/login",methods=['POST'])
 def login():
     db = mysql.connector.connect(
@@ -69,22 +75,28 @@ def login():
     mycursor=db.cursor()
     
     email = request.json.get('email')
-    password = request.json.get('password')
-    sql="select * from `user_details` where `email`LIKE '{}' and `password` LIKE'{}' ".format(email,password)
-
+    #password = request.json.get('password')
+    #sql="select * from `user_details` where `email`LIKE '{}' and `password` LIKE'{}' ".format(email,password)
+    sql="select * from `userdata` where `email`LIKE '{}'".format(email)
     mycursor.execute(sql)
     users=mycursor.fetchall()
     user_list = []
     for user in users:
         user_dict = {
-            'user_id': user[0],
+            'userid': user[0],
             'fullname': user[1],
             'email': user[2],
+            'createddate':user[5],
+            'status':user[6]
         }
         user_list.append(user_dict)
+        
+    #return jsonify(user_list,{"login":"successfull"})
+    return jsonify({"login":"successfull"})
 
-    return jsonify(user_list)
-    
+
+
+#search recipe by name
 @app.route("/recipe_search_byname/<recipename>",methods=['GET'])
 def recipe_search_byname(recipename):
     db = mysql.connector.connect(
@@ -120,6 +132,8 @@ def recipe_search_byname(recipename):
     return jsonify(user_list)   
 
 
+
+#search recipe by ingredient
 @app.route("/recipe_search_by_ingredient/<ingredients>", methods=['GET'])
 def recipe_search_by_ingredient(ingredients):
     db = mysql.connector.connect(
@@ -157,6 +171,90 @@ def recipe_search_by_ingredient(ingredients):
     db.close()
 
     return jsonify(recipe_list)
+
+
+# showing all recipes
+@app.route("/explorenow",methods=['POST'])
+def explorenow():
+    db = mysql.connector.connect(
+    host='localhost',
+    port=3307,
+    user='root',
+    password='',
+    database='recipe_app_db'
+    )
+    mycursor=db.cursor()
+    
+    
+    sql="select * from `recipedata`"
+
+    mycursor.execute(sql)
+    users=mycursor.fetchall()
+    user_list = []
+    for user in users:
+        user_dict = {
+            'recipename': user[1],
+            'instructions':user[8],
+            'imageurl':user[9]
+        }
+        user_list.append(user_dict)
+
+    return jsonify(user_list)   
+
+# rating
+@app.route("/setrate",methods=['POST'])
+def raterecipe():
+    db = mysql.connector.connect(
+    host='localhost',
+    port=3307,
+    user='root',
+    password='',
+    database='recipe_app_db'
+    )
+    mycursor=db.cursor()
+    
+    recipeid = request.json.get('recipeid')
+    userid = request.json.get('userid')
+    rating = request.json.get('rating')
+    
+    
+    #checking for that recipe whether the user has already rated
+    fetch="select * from `review` where `userid`='{}' and `recipeid` ='{}' ".format(userid,recipeid)
+    mycursor.execute(fetch)
+    user_exits=mycursor.fetchone()
+    
+    if user_exits:
+        return jsonify({"message":"already rated"})
+    
+    else:
+    
+        usercount= "select count(ratingid) from review where recipeid = '{}'".format(recipeid)
+        mycursor.execute(usercount)
+        usercount = mycursor.fetchone()[0]
+        
+        # if rating exist for the recipe already
+        if usercount>0:
+            sumofrating="select sum(rating) from review where recipeid = '{}'".format(recipeid)
+            mycursor.execute(sumofrating)
+            sumofrating = mycursor.fetchone()[0]
+            newrating = (float(sumofrating) + float(rating)) / (int(usercount) + 1)
+            updatetable="insert into review(userid,recipeid,rating)values(%s,%s,%s)"
+            values=(userid,recipeid,rating)
+            mycursor.execute(updatetable,values)
+            db.commit()
+            return jsonify({"message": "rating added", "rating": newrating})
+        
+        #if rating doesnt exist already
+        else:
+            updaterating="insert into review(userid,recipeid,rating)values(%s,%s,%s)"
+            values=(userid,recipeid,rating)
+            mycursor.execute(updaterating,values)
+            db.commit()
+            return jsonify({"message": "rating added(no existing ratings present)", "rating": rating})
+        
+
+
+    
   
 
 @app.route("/dish")
