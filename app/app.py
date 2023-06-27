@@ -174,7 +174,7 @@ def recipe_search_by_ingredient(ingredients):
 
 
 # showing all recipes
-@app.route("/explorenow",methods=['POST'])
+@app.route("/explorenow",methods=['GET'])
 def explorenow():
     db = mysql.connector.connect(
     host='localhost',
@@ -237,12 +237,12 @@ def raterecipe():
             sumofrating="select sum(rating) from review where recipeid = '{}'".format(recipeid)
             mycursor.execute(sumofrating)
             sumofrating = mycursor.fetchone()[0]
-            newrating = (float(sumofrating) + float(rating)) / (int(usercount) + 1)
+            newrating = (int(sumofrating) + int(rating)) / (int(usercount) + 1)
             updatetable="insert into review(userid,recipeid,rating)values(%s,%s,%s)"
             values=(userid,recipeid,rating)
             mycursor.execute(updatetable,values)
             db.commit()
-            return jsonify({"message": "rating added", "rating": newrating})
+            return jsonify({"message": "rating added", "rating": int(newrating)})
         
         #if rating doesnt exist already
         else:

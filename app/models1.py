@@ -37,6 +37,30 @@ class review(mydb.Model):
         self.userid = userid
         self.recipeid = recipeid
         self.rating = rating
+        
+class recipedata(mydb.Model):
+    recipeid = mydb.Column(mydb.Integer, primary_key=True)
+    recipename = mydb.Column(mydb.String(255))
+    ingredients = mydb.Column(mydb.String(255))
+    totaltimeinmins = mydb.Column(mydb.Integer)
+    servings = mydb.Column(mydb.Integer)
+    cuisine = mydb.Column(mydb.String(30))
+    course = mydb.Column(mydb.String(30))
+    diet = mydb.Column(mydb.String(255))
+    insructions = mydb.Column(mydb.String(255))
+    imageurl = mydb.Column(mydb.String(255))
+    
+
+    
+    
+    def __init__(self, recipeid, recipename, ingredients,insructions,imageurl):
+        self.recipeid = recipeid
+        self.recipename = recipename
+        self.ingredients = ingredients
+        self.insructions = insructions
+        self.imageurl = imageurl
+        
+
 
 if __name__ == "__main__":
     with app.app_context():
