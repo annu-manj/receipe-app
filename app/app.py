@@ -1,14 +1,15 @@
-from flask import Flask, render_template, request,jsonify
+from flask import Flask, render_template, request,jsonify,session
 import mysql.connector
 #from flask_sqlalchemy import SQLAlchemy
 #from flask_marshmallow import Marshmallow
-#from flask_cors import CORS
+from flask_cors import CORS,cross_origin
 import json
 import csv
 import MySQLdb
 from datetime import datetime
 
 app = Flask(__name__)
+app.secret_key="msnfbjagsfhakj"
 #ma=Marshmallow(app)
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:@localhost:3307/recipe_app_db'
 #app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -20,7 +21,7 @@ db = mysql.connector.connect(
     password='',
     database='recipe_app_db'
 )
-#CORS(app)
+CORS(app,supports_credentials=True)
 
 @app.route("/",methods=['GET']) 
 def index():
@@ -75,12 +76,12 @@ def login():
     mycursor=db.cursor()
     
     email = request.json.get('email')
-    #password = request.json.get('password')
-    #sql="select * from `user_details` where `email`LIKE '{}' and `password` LIKE'{}' ".format(email,password)
-    sql="select * from `userdata` where `email`LIKE '{}'".format(email)
+    password = request.json.get('password')
+    sql="select * from `userdata` where `email`LIKE '{}' and `password` LIKE'{}' ".format(email,password)
+    #sql="select * from `userdata` where `email`LIKE '{}'".format(email)
     mycursor.execute(sql)
-    users=mycursor.fetchall()
-    user_list = []
+    users=mycursor.fetchone()
+    '''user_list = []
     for user in users:
         user_dict = {
             'userid': user[0],
@@ -89,12 +90,26 @@ def login():
             'createddate':user[5],
             'status':user[6]
         }
-        user_list.append(user_dict)
+        user_list.append(user_dict)'''
+    if users:
+            # Create session data, we can access this data in other routes
+            session['loggedin'] = True
+            session['username'] = users[2]
+            # Redirect to home page
+            return jsonify(users,{"login":"successfull"})
+    else:
+            # Account doesnt exist or username/password incorrect
+            return jsonify({"login":"unsuccessfull"})
+    '''
         
-    #return jsonify(user_list,{"login":"successfull"})
-    return jsonify({"login":"successfull"})
+    return jsonify(user_list,{"login":"successfull"})
+    #return jsonify({"login":"successfull"})'''
 
-
+@app.route("/logout")
+def logout():
+    session.pop('loggedin',None)
+    session.pop("username",None)
+    return jsonify({"message":"loggedout"})
 
 #search recipe by name
 @app.route("/recipe_search_byname/<recipename>",methods=['GET'])
