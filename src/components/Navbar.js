@@ -41,11 +41,14 @@ export default function Navbar(){
         setShowSidebar(false)
     }
 
-
+    window.onload = function() {
+        var emoji = document.querySelector('.emoji');
+        emoji.style.animation = 'emojiAnimation 0.6s linear';
+      }
     return (
         <>
             <div className="navbar container">
-                <Link to="/" className="logo">F<span>oo</span>dCourt</Link>
+                <Link to="/" className="logo">F<span class="emoji">oo</span>dCourt</Link>
                 <div className="nav-links">
                     { links.map(link => (
                         <Link className={location.pathname === link.path ? "active" : ""} to={link.path} key={link.name}>{link.name}</Link>
