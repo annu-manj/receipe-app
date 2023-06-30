@@ -96,7 +96,7 @@ def login():
             session['loggedin'] = True
             session['username'] = users[2]
             # Redirect to home page
-            return jsonify({"login":"successfull"})
+            return jsonify(users[2],{"login":"successfull"})
     else:
             # Account doesnt exist or username/password incorrect
             return jsonify({"login":"unsuccessfull"})
