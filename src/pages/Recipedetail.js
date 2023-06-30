@@ -16,7 +16,7 @@ export default function Recipedetail({recipe}){
         </center>
         <h2><FontAwesomeIcon className="icon" icon={faBookOpen} />Recipe Descirption</h2><br></br><hr></hr><br></br>
         <h3><FontAwesomeIcon className="icon" icon={faClockFour} />Total timing</h3><br></br><hr></hr><br></br>
-        <h3><FontAwesomeIcon className="icon" icon={faCocktail} />Cursine</h3><br></br><hr></hr><br></br>
+        <h3><FontAwesomeIcon className="icon" icon={faCocktail} />Cuisine</h3><br></br><hr></hr><br></br>
         <h3><FontAwesomeIcon className="icon" icon={faBowlFood} />Course</h3><br></br><hr></hr><br></br>
         <h3><FontAwesomeIcon className="icon" icon={faCarrot} />Diet</h3><br></br><hr></hr><br></br>
         <h3><FontAwesomeIcon className="icon" icon={faPlateWheat} />No. of Servings</h3><br></br><hr></hr><br></br>
