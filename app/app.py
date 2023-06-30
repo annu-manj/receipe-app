@@ -96,7 +96,7 @@ def login():
             session['loggedin'] = True
             session['username'] = users[2]
             # Redirect to home page
-            return jsonify(users,{"login":"successfull"})
+            return jsonify({"login":"successfull"})
     else:
             # Account doesnt exist or username/password incorrect
             return jsonify({"login":"unsuccessfull"})
@@ -189,7 +189,7 @@ def recipe_search_by_ingredient(ingredients):
 
 
 # showing all recipes
-@app.route("/explorenow",methods=['GET'])
+@app.route("/recipe",methods=['GET'])
 def explorenow():
     db = mysql.connector.connect(
     host='localhost',
