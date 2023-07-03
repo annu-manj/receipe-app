@@ -7,13 +7,27 @@ import json
 import csv
 import MySQLdb
 from datetime import datetime
+#from werkzeug.security import generate_password_hash,check_password_hash
+from flask_bcrypt import Bcrypt
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import jwt_required
+from flask_jwt_extended import JWTManager
+
 
 app = Flask(__name__)
-app.secret_key="msnfbjagsfhakj"
+app.secret_key="ScpJIgjWVK_Xv-jD"
+jwt = JWTManager(app)
+bcrypt = Bcrypt(app)
+CORS(app,supports_credentials=True)
+
+
 #ma=Marshmallow(app)
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:@localhost:3307/recipe_app_db'
 #app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 #db=SQLAlchemy(app)
+
+
 db = mysql.connector.connect(
     host='localhost',
     port=3307,
@@ -40,10 +54,20 @@ def signup():
     )
     mycursor=db.cursor()
     
-    fullname = request.json.get('fullname')
+    
+    '''fullname = request.json.get('fullname')
     email = request.json.get('email')
     password = request.json.get('password')
-    confirm_password = request.json.get('confirm_password')
+    confirm_password = request.json.get('confirm_password')'''
+    
+    fullname = request.json['fullname']
+    email = request.json['email']
+    password = request.json['password']
+    confirm_password = request.json['confirm_password']
+    
+    hashed_password = bcrypt.generate_password_hash(password)
+    #bcrypt.check_password_hash(pw_hash, 'password')
+    
     
     check_query = "SELECT * FROM userdata WHERE email = %s"
     check_values = (email,)
@@ -52,17 +76,17 @@ def signup():
 
     if existing_user:
         return jsonify({"message": "User already exists"})
-
-    if password == confirm_password:
-        sql="insert into userdata(fullname,email,password,confirm_password,createddate,status)values(%s,%s,%s,%s,%s,%s)"
-        values=(fullname,email,password,confirm_password,datetime.now(),"active")
+    elif (password == confirm_password):
+        #sql="insert into userdata(fullname,email,password,confirm_password,createddate,status)values(%s,%s,%s,%s,%s,%s)"
+        sql="insert into userdata(fullname,email,password,createddate,status)values(%s,%s,%s,%s,%s)"
+        values=(fullname,email,hashed_password,datetime.now(),"active")
         mycursor.execute(sql,values)
         db.commit()
-        return jsonify({"message":"signed up"})
+        return jsonify({"status":"signed up"})
     else:
         return jsonify({"message":"password doesn't match"})
         
-    
+'''    
 #login api
 @app.route("/login",methods=['POST'])
 def login():
@@ -81,7 +105,7 @@ def login():
     #sql="select * from `userdata` where `email`LIKE '{}'".format(email)
     mycursor.execute(sql)
     users=mycursor.fetchone()
-    '''user_list = []
+    user_list = []
     for user in users:
         user_dict = {
             'userid': user[0],
@@ -90,7 +114,7 @@ def login():
             'createddate':user[5],
             'status':user[6]
         }
-        user_list.append(user_dict)'''
+        user_list.append(user_dict)
     if users:
             # Create session data, we can access this data in other routes
             session['loggedin'] = True
@@ -100,10 +124,34 @@ def login():
     else:
             # Account doesnt exist or username/password incorrect
             return jsonify({"login":"unsuccessfull"})
-    '''
+    
         
     return jsonify(user_list,{"login":"successfull"})
     #return jsonify({"login":"successfull"})'''
+    
+@app.route("/login",methods=['POST'])
+def login():
+    db = mysql.connector.connect(
+    host='localhost',
+    port=3307,
+    user='root',
+    password='',
+    database='recipe_app_db'
+    )
+    mycursor=db.cursor()
+    email = request.json['email']
+    password = request.json['password']
+    sql="select * from `userdata` where `email`LIKE '{}'".format(email)
+    mycursor.execute(sql)
+    users=mycursor.fetchone()
+    
+    if users is None:
+        return jsonify(users,{"error":"unauthorised access"})
+    
+    if not bcrypt.check_password_hash(users[3], password):
+        return jsonify(users,{"error":"unauthorised access"})
+    
+    return jsonify({"login":"successfull"})
 
 @app.route("/logout")
 def logout():
