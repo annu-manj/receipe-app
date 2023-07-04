@@ -8,9 +8,6 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:''@localhost:3307/recipe_app_db'  # access to the SQL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-
-
-
 class userdata(mydb.Model):
     userid = mydb.Column(mydb.Integer, primary_key=True)
     email = mydb.Column(mydb.String(20),unique=True)
@@ -25,8 +22,6 @@ class userdata(mydb.Model):
         self.email = email
         self.password = password
         
-
-
 class review(mydb.Model):
     ratingid = mydb.Column(mydb.Integer, primary_key=True)
     userid = mydb.Column(mydb.Integer)
@@ -37,6 +32,7 @@ class review(mydb.Model):
         self.userid = userid
         self.recipeid = recipeid
         self.rating = rating
+        
         
 class recipedata(mydb.Model):
     recipeid = mydb.Column(mydb.Integer, primary_key=True)

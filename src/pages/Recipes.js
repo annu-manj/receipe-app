@@ -1,8 +1,27 @@
 import PreviousSearches from "../components/PreviousSearches"
 import RecipeCard from "../components/RecipeCard"
+import React, { useState } from "react";
+import { useEffect } from "react";
+import axios from 'axios';
+import {useNavigate} from "react-router-dom";
+
 
 export default function Recipes(){
-    const recipes = [
+    const [recipes, setRecipes] = useState([{}]);
+
+    useEffect(() => {
+        axios.get('http://127.0.0.1:5000/recipes')
+          .then(function (response) {
+            console.log(response);
+            setRecipes(response.data);
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      }, []);
+
+
+   /* [
         {
             id: 1,
             title: "Chicken Pan Pizza",
@@ -44,7 +63,7 @@ export default function Recipes(){
        
        
       
-    ].sort(() => Math.random() - 0.5)
+    ].sort(() => Math.random() - 0.5)  */
 
     return (
         <div>

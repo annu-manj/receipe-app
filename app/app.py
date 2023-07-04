@@ -13,6 +13,7 @@ from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
 from flask_jwt_extended import JWTManager
+import os
 
 
 app = Flask(__name__)
@@ -45,10 +46,12 @@ def index():
 #signup api
 @app.route("/signup", methods=[ 'POST'])
 def signup():
+    #db_password=os.environ.get('DB_PASSWORD')
     db = mysql.connector.connect(
     host='localhost',
     port=3307,
     user='root',
+    #password=db_password,
     password='',
     database='recipe_app_db'
     )
@@ -237,7 +240,7 @@ def recipe_search_by_ingredient(ingredients):
 
 
 # showing all recipes
-@app.route("/recipe",methods=['GET'])
+@app.route("/recipes",methods=['GET'])
 def explorenow():
     db = mysql.connector.connect(
     host='localhost',
@@ -257,7 +260,6 @@ def explorenow():
     for user in users:
         user_dict = {
             'recipename': user[1],
-            'instructions':user[8],
             'imageurl':user[9]
         }
         user_list.append(user_dict)
