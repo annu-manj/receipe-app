@@ -1,3 +1,4 @@
+#importing required modules
 from flask import Blueprint,Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import mysql.connector
@@ -14,76 +15,52 @@ db = mysql.connector.connect(
     password='',
     database='recipe_app_db'
     )
-
+#Fetching required data from db
 @top_rated_blueprint.route('/toprate')
 def get_top_rated():
     #def data():
     mycursor=db.cursor()
     
-        # Execute a SELECT query to retrieve data from the 'users' table
-    mycursor.execute('SELECT r.userid,r.recipeid,r.rating,rc.recipename FROM review r,recipedata rc WHERE r.recipeid=rc.recipeid')
+    # Execute a SELECT query to retrieve data from the 'review,recipedata' table
+    mycursor.execute('SELECT r.userid,r.recipeid,r.rating,rc.recipename,rc.imageurl FROM review r,recipedata rc WHERE r.recipeid=rc.recipeid')
     
-        # Fetch all rows returned by the query
+    # Fetch all rows returned by the query
     rows = mycursor.fetchall()
-        # Convert the data into a list of dictionaries
+    # Convert the data into a list of dictionaries
     rates = []
     for row in rows:
         rate = {
             'userid':row[0],
             'recipeid': row[1],
             'rating': row[2],
-            'recipename': row[3]
+            'recipename': row[3],
+            'imageurl': row[4]
         }
         rates.append(rate)
    
-        # Convert the list of dictionaries to a JSON string
+    # Convert the list of dictionaries to a JSON string
     json_data = json.dumps(rates)
 
-        # Specify the CSV file path
+    # Specify the CSV file path
     csv_file_path = 'dbr.csv'
 
-        # Open the CSV file in write mode
+    # Open the CSV file in write mode
     with open(csv_file_path, mode='w', newline='') as file:
         writer = csv.DictWriter(file, fieldnames=rates[0].keys())
     
-            # Write the header row
+        # Write the header row
         writer.writeheader()
     
-            # Write each data row
+        # Write each data row
         for rate in rates:
             writer.writerow(rate)
-        #return jsonify(json_data)
-    '''
-
-    # Create a CSV string
-        csv_data = ''
-        with open('rates.csv', 'w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerows(rates)
-            csv_data = file.getvalue()
-
-        # Set HTTP headers for CSV response
-        response = make_response(csv_data)
-        response.headers['Content-Type'] = 'text/csv'
-        response.headers['Content-Disposition'] = 'attachment; filename=dbr.csv'
-
-        return response
-
-
-    #mycursor=db.cursor()
     
-    # Execute a SELECT query to retrieve data from the 'review' table
-    totalRatingCount="select count(ratingid) from review where recipeid = '{}'".format(recipeid)
-    mycursor.execute(totalRatingCount)
-    totalRatingCount= mycursor.fetchone()[0]
-    
-    avgofrating="select avg(rating) from review where recipeid = '{}'".format(recipeid)
-    mycursor.execute(avgofrating)
-    avgofrating = mycursor.fetchone()[0]'''
-    
-    
+    #Top_Ratings calculation using Weighted_Average 
+
+    #Reading csv as a dataframe
     combined_df=pd.read_csv(r"dbr.csv")
-
+    
+    #calculating total_rating_count that each recipe had
     no_of_votes=(combined_df.groupby(by=['recipeid'])['rating'].count().reset_index().
     rename(columns = {'rating': 'totalRatingCount'})
     [['recipeid', 'totalRatingCount']])
@@ -93,11 +70,14 @@ def get_top_rated():
     rename(columns = {'rating': 'avg'})
     [['recipeid', 'avg']])
 
-    #copies recipename series from recipe_df to no_of_votes df
+    #copies recipename series from combined_df to no_of_votes df
     no_of_votes['recipename']=combined_df['recipename']
 
     #copies average series from ratings_avg df to no_of_votes df
     no_of_votes['average']=ratings_avg['avg']
+    
+    #copies imageurl series from combined_df to no_of_votes df
+    no_of_votes['imageurl']=combined_df['imageurl']
 
     #weighted Rating calculation
     #'weighted_average'=((r*v)+(c*m))/(v+m)
@@ -112,7 +92,8 @@ def get_top_rated():
     #listing out top_rated recipes
     recipe=no_of_votes.sort_values('weighted_avg',ascending=False)
     lists=recipe[['recipename','weighted_avg','recipeid']]
-    list=recipe[['recipename','recipeid']]
+    list=recipe[['recipename','recipeid','imageurl']]
+    
     #fetching top_rated 6 recipes
     top_list=list.head(6)
 
@@ -121,6 +102,3 @@ def get_top_rated():
 
     # Return the JSON response
     return jsonify(json_response)
-
-
-    #return "Python Server HEALTH STATUS is ok"
