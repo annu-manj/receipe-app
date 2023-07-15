@@ -163,7 +163,7 @@ def logout():
     return jsonify({"message":"loggedout"})
 
 #search recipe by name
-@app.route("/recipe_search_byname/<recipename>",methods=['GET'])
+@app.route("/recipe/<recipename>",methods=['GET'])
 def recipe_search_byname(recipename):
     db = mysql.connector.connect(
     host='localhost',
@@ -174,10 +174,12 @@ def recipe_search_byname(recipename):
     )
     mycursor=db.cursor()
     
-    recipename = request.json.get('recipename')
-    sql="select * from `recipedata` where `recipename`LIKE '{}'".format(recipename)
-
-    mycursor.execute(sql)
+    #recipename = request.args.get('recipename')
+    #sql="select * from `recipedata` where `recipename`LIKE '{}'".format(recipename)
+    sql = "SELECT * FROM `recipedata` WHERE `recipename` LIKE %s"
+    params = ('%' + recipename + '%',)
+    
+    mycursor.execute(sql,params)
     users=mycursor.fetchall()
     user_list = []
     for user in users:
@@ -264,7 +266,46 @@ def explorenow():
         }
         user_list.append(user_dict)
 
-    return jsonify(user_list)   
+    return jsonify(user_list)  
+
+@app.route("/viewdetails", methods=['GET'])
+def viewrecipe():
+    db = mysql.connector.connect(
+        host='localhost',
+        port=3307,
+        user='root',
+        password='',
+        database='recipe_app_db'
+    )
+    mycursor = db.cursor()
+
+    recipename = request.args.get('recipename')
+    
+    print("recipename",recipename)
+    
+    sql="select * from `recipedata` where `recipename` LIKE '{}'".format(recipename)
+
+    mycursor.execute(sql)
+    recipes = mycursor.fetchall()
+    recipe_list = []
+    for recipe in recipes:
+        recipe_dict = {
+            'recipeid': recipe[0],
+            'recipename': recipe[1],
+            'ingredients': recipe[2],
+            'totaltimeinmins': recipe[3],
+            'servings': recipe[4],
+            'cuisine': recipe[5],
+            'course': recipe[6],
+            'diet': recipe[7],
+            'instructions': recipe[8],
+            'imageurl': recipe[9]
+        }
+        recipe_list.append(recipe_dict)
+
+    db.close()
+
+    return jsonify(recipe_list)
 
 # rating
 @app.route("/setrate",methods=['POST'])

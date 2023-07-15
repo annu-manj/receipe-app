@@ -27,8 +27,8 @@ import {
             <Route path="/login" element={<Login />} />
             <Route path="/signin" element={<Signin />} />
             <Route path="/more" element={<More />} />
-            <Route path="/recipedetail" element={<Recipedetail />} />
-
+            <Route path="/Recipedetail/:recipename" element={<Recipedetail />} />
+            {/*<Route path="/Recipedetail" component={Recipedetail} />*/}
           </Routes>
         </div>
         <Footer />

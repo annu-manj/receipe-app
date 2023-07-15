@@ -1,5 +1,5 @@
 import CustomImage from "./CustomImage"
-
+import { Link } from 'react-router-dom';
 
 export default function RecipeCard({recipe}){
     return (
@@ -10,7 +10,8 @@ export default function RecipeCard({recipe}){
                 <img className="auther-img" src={recipe.authorImg} alt="recipe-img"/>
     */}
                 <p className="recipe-title">{recipe.recipename}</p>
-                <a className="view-btn"  href="./Recipedetail">VIEW RECIPE</a>
+                {/*<a className="view-btn"  href="./Recipedetail">VIEW RECIPE</a>*/}
+                <Link to={`/Recipedetail/${recipe.recipename}`} className="view-btn">VIEW RECIPE</Link>
             </div>
         </div>
     )

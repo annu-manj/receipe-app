@@ -1,29 +1,55 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faBarsProgress, faBookOpen,  faBowlFood, faCarrot, faCartShopping, faClockFour, faCocktail,  faPlateWheat } from "@fortawesome/free-solid-svg-icons"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBarsProgress, faBowlFood, faCarrot, faCartShopping, faClockFour, faCocktail, faPlateWheat } from "@fortawesome/free-solid-svg-icons";
+import { useEffect, useState } from "react";
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
 
+export default function Recipedetail() {
+  const [recipeData, setRecipeData] = useState([]);
+  const { recipename } = useParams(); // Retrieve recipename from URL parameter
 
+  useEffect(() => {
+    // Function to fetch recipe details from the API
+    const fetchRecipeDetails = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/viewdetails', {
+          params: {
+            recipename: recipename
+          }
+        });
+        console.log(response.data); 
+        setRecipeData(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
 
+    fetchRecipeDetails();
+  }, [recipename]);
 
+  return (
+    <>
+      {recipeData.map((recipe) => (
+        <div key={recipe.recipeid}>
+          <h1>{recipe.recipename}</h1><br></br><hr></hr><br></br>
+          <center>
+            <div className="img_container">
+              <img src={recipe.imageurl} className="rec_img" alt="recipe-img" /><br></br><br></br><hr></hr><br></br>
+            </div>
+          </center>
 
-export default function Recipedetail({recipe}){
-    return (
-        <div >
-        <h1>Recipe Title</h1><br></br><hr></hr><br></br>
-        <center>
-        <div class="img_container">
-        <img src="/img/gallery/img_4.jpg" className="rec_img" alt="recipe-img" /><br></br><br></br><hr></hr><br></br>
+          <h3><FontAwesomeIcon className="icon" icon={faClockFour} />Total timing:{recipe.totaltimeinmins}</h3><br></br><hr></hr><br></br>
+          <h3><FontAwesomeIcon className="icon" icon={faCocktail} />Cuisine:{recipe.cuisine}</h3><br></br><hr></hr><br></br>
+          <h3><FontAwesomeIcon className="icon" icon={faBowlFood} />Course:{recipe.course}</h3><br></br><hr></hr><br></br>
+          <h3><FontAwesomeIcon className="icon" icon={faCarrot} />Diet:{recipe.diet}</h3><br></br><hr></hr><br></br>
+          <h3><FontAwesomeIcon className="icon" icon={faPlateWheat} />No. of Servings:{recipe.servings}</h3><br></br><hr></hr><br></br>
+          <h3><FontAwesomeIcon className="icon" icon={faCartShopping} />Ingredients</h3><br></br><p>{recipe.ingredients}</p><hr className="custom-hr"></hr><br></br>
+          
+          <h3><FontAwesomeIcon className="icon" icon={faBarsProgress} />Instruction</h3><br></br>
+          {recipe.instructions}
         </div>
-        </center>
-        <h2><FontAwesomeIcon className="icon" icon={faBookOpen} />Recipe Descirption</h2><br></br><hr></hr><br></br>
-        <h3><FontAwesomeIcon className="icon" icon={faClockFour} />Total timing</h3><br></br><hr></hr><br></br>
-        <h3><FontAwesomeIcon className="icon" icon={faCocktail} />Cuisine</h3><br></br><hr></hr><br></br>
-        <h3><FontAwesomeIcon className="icon" icon={faBowlFood} />Course</h3><br></br><hr></hr><br></br>
-        <h3><FontAwesomeIcon className="icon" icon={faCarrot} />Diet</h3><br></br><hr></hr><br></br>
-        <h3><FontAwesomeIcon className="icon" icon={faPlateWheat} />No. of Servings</h3><br></br><hr></hr><br></br>
-        <h3><FontAwesomeIcon className="icon" icon={faCartShopping} />Ingredients</h3><br></br><hr class="custom-hr"></hr><br></br>
-        <h3><FontAwesomeIcon className="icon" icon={faBarsProgress} />Steps</h3>
+      ))}
+    </>
+  );
+}
 
-
-        </div>
-    )
-    }

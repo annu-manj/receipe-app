@@ -32,7 +32,9 @@ export default function Signin(){
             .then(function (response) {
                 console.log(response);
                 //console.log(response.data);
-                navigate("/");
+                navigate("/Recipes");
+                
+                
             })
             .catch(function (error) {
                 console.log(error, 'error');
@@ -66,7 +68,7 @@ export default function Signin(){
             </div>
             <FontAwesomeIcon className="icon" icon={faKey} />
             <input type="password" name="confrim_password" value={confirm_password} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Renter your password.." required /><br></br><br></br>
-            <button className="btn" type="submit" onClick={registerUser}> Sign In  <FontAwesomeIcon icon={faArrowCircleRight} /></button><br></br><br></br>
+            <button className="btn" type="button" onClick={registerUser}> Sign In  <FontAwesomeIcon icon={faArrowCircleRight} /></button><br></br><br></br>
             </form>
            
          </center>

@@ -3,11 +3,12 @@ import RecipeCard from "../components/RecipeCard"
 import React, { useState } from "react";
 import { useEffect } from "react";
 import axios from 'axios';
-import {useNavigate} from "react-router-dom";
+//import {useNavigate} from "react-router-dom";
 
 
 export default function Recipes(){
     const [recipes, setRecipes] = useState([{}]);
+    
 
     useEffect(() => {
         axios.get('http://127.0.0.1:5000/recipes')
@@ -17,7 +18,7 @@ export default function Recipes(){
           })
           .catch(function (error) {
             console.log(error);
-          });
+          });   
       }, []);
 
 
@@ -67,9 +68,10 @@ export default function Recipes(){
 
     return (
         <div>
-            <PreviousSearches />
+            <PreviousSearches/>
             <div className="recipes-container">
                 {/* <RecipeCard /> */}
+                
                 {recipes.map((recipe, index) => (
                     <RecipeCard key={index} recipe={recipe} />
                 ))}

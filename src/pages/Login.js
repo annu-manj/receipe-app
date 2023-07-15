@@ -25,7 +25,7 @@ export default function Login(){
             .then(function (response) {
                 console.log(response);
                 //console.log(response.data);
-                navigate("/");
+                navigate("/Recipes");
             })
             .catch(function (error) {
                 console.log(error, 'error');
@@ -42,20 +42,20 @@ export default function Login(){
 
     }
   return (
-    <div>
+    
         <div className="log-container">
-              </div>
-                <form> 
-                    <p className="lead fw-normal mb-0 me-3">Log Into Your Account</p>
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} id="form3Example3" className="form-control form-control-lg" placeholder="Enter a valid email address" />
-                    <label className="form-label" for="form3Example3">Email address</label>
-                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} id="form3Example4" className="form-control form-control-lg" placeholder="Enter password" />
-                        <label className="form-label" for="form3Example4">Password</label>
-                        <input className="form-check-input me-2" type="checkbox" value="" id="form2Example3" />
+             <center>
+                <form className="login-form"> 
+                    <p>Log Into Your Account</p><br></br>
+                    <label  for="form3Example3">Email address</label><br></br>
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} id="form3Example3"  placeholder="Enter a valid email address" /><br></br>
+                        <label className="form-label" for="form3Example4">Password</label><br></br>
+                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} id="form3Example4"  placeholder="Enter password" /><br></br>
+                        <input  type="checkbox" value="" id="form2Example3" />
                         <label className="form-check-label" for="form2Example3">
                         Remember me
-                      </label>
-                    <a href="#!" className="text-body">Forgot password?</a>
+                      </label><br></br>
+                    <a href="#!" className="text-body">Forgot password?</a><br></br><br></br>
 
                     <button type="button" className="btn btn-primary btn-lg" onClick={logInUser} >Login</button>
                     <br></br>
@@ -65,7 +65,7 @@ export default function Login(){
  
                 </form>
             <button className="btn" onClick={NavigateSigin}> Sign Up </button><br></br>
-                
+                </center>
             </div>
   );
 }
