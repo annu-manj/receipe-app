@@ -1,9 +1,14 @@
+
+
+
 import { useState } from 'react'
 import './App.css'
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import { MainContainer, ChatContainer, MessageList, Message, MessageInput, TypingIndicator } from '@chatscope/chat-ui-kit-react';
 
-const API_KEY = "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";
+const apiKey = '() => <h1>{process.env.API_KEY}</h1>;';
+
+
 // "Explain things like you would to a 10 year old learning how to code."
 const systemMessage = { //  Explain things like you're talking to a software professional with 5 years of experience.
   "role": "system", "content": "Explain things like you're talking to a software professional with 2 years of experience."
@@ -67,7 +72,7 @@ function App() {
     {
       method: "POST",
       headers: {
-        "Authorization": "Bearer " + API_KEY,
+        "Authorization": "Bearer " +apiKey,
         "Content-Type": "application/json"
       },
       body: JSON.stringify(apiRequestBody)
